@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotional Compass: Mood & Overthinking Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <style>
+        :root {
+            --bg-gradient-start: #0F2027;
+            --bg-gradient-middle: #203A43;
+            --bg-gradient-end: #2C5364;
+        }
+        body {
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-middle), var(--bg-gradient-end));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.125);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        .hover-lift {
+            transition: all 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .breathing-animation {
+            animation: breathing 5s ease-out infinite normal;
+        }
+        @keyframes breathing {
+            0% { transform: scale(0.98); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(0.98); }
+        }
+        .option-btn {
+            transition: all 0.3s ease, transform 0.2s ease;
+        }
+        .option-btn:hover {
+            transform: translateY(-3px) scale(1.02);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        /* @keyframes fadeIn {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        } */
+    </style>
+</head>
+<body class="flex items-center justify-center p-4 overflow-x-hidden">
+    <div id="appContainer" class="w-full max-w-4xl relative">
+        <!-- Start Screen -->
+        <div id="startScreen" class="text-center text-white breathing-animation">
+            <h1 class="text-5xl md:text-6xl font-extrabold mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+                Emotional Compass
+            </h1>
+            <p class="text-lg md:text-xl mb-8 text-white/80 max-w-xl mx-auto">
+                Understand your emotions, identify overthinking patterns, and discover actionable solutions tailored just for you.
+            </p>
+            <button id="startButton" class=" text-white px-8 py-3 md:px-10 md:py-4 rounded-full text-lg md:text-xl font-semibold hover-lift">
+                Begin Self-Reflection
+            </button>
+        </div>
+
+        <!-- Mood Assessment Screen -->
+        <div id="moodAssessmentScreen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-white">Mood Assessment</h2>
+                <div class="text-white/70 text-sm">Step 1 of 2</div>
+            </div>
+            <div id="progressContainer" class="mb-6 w-full bg-white/20 rounded-full h-2.5">
+                <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-2.5 rounded-full" style="width: 0%;"></div>
+            </div>
+            
+            <div id="questionContainer" class="glass-morphism p-6 md:p-8 rounded-2xl">
+                <h2 id="questionText" class="text-2xl md:text-3xl font-bold text-white text-center mb-6 md:mb-8"></h2>
+                <div id="optionsContainer" class="grid gap-3 md:gap-4"></div>
+            </div>
+        </div>
+
+        <!-- Overthinking Assessment Screen -->
+        <div id="overthinkingAssessmentScreen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-white">Overthinking Patterns</h2>
+                <div class="text-white/70 text-sm">Step 2 of 2</div>
+            </div>
+            <div id="otProgressContainer" class="mb-6 w-full bg-white/20 rounded-full h-2.5">
+                <div id="otProgressBar" class="bg-gradient-to-r from-purple-500 to-pink-600 h-2.5 rounded-full" style="width: 0%;"></div>
+            </div>
+            
+            <div id="otQuestionContainer" class="glass-morphism p-6 md:p-8 rounded-2xl">
+                <h2 id="otQuestionText" class="text-2xl md:text-3xl font-bold text-white text-center mb-6 md:mb-8"></h2>
+                <div id="otOptionsContainer" class="grid gap-3 md:gap-4"></div>
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="resultScreen" class="hidden text-center text-white">
+            <div class="glass-morphism p-6 md:p-10 rounded-2xl">
+                <div class="flex justify-center mb-6">
+                    <div class="w-24 h-24 rounded-full bg-gradient-to-r from-blue-400 to-purple-600 flex items-center justify-center text-4xl">
+                        <span id="moodEmoji"></span>
+                    </div>
+                </div>
+                <h2 id="moodTitle" class="text-3xl md:text-4xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600"></h2>
+                <p id="moodDescription" class="text-lg md:text-xl mb-6 text-white/90"></p>
+                
+                <div class="mb-8">
+                    <h3 class="text-xl md:text-2xl font-bold mb-4 text-white">Your Overthinking Patterns</h3>
+                    <div id="overthinkingPatterns" class="grid gap-4 mb-6"></div>
+                </div>
+                
+                <div class="mb-8">
+                    <h3 class="text-xl md:text-2xl font-bold mb-4 text-white">Actionable Recommendations</h3>
+                    <div id="recommendationContainer" class="grid md:grid-cols-2 gap-4 mb-6"></div>
+                </div>
+                
+                <div class="mb-8">
+                    <h3 class="text-xl md:text-2xl font-bold mb-4 text-white">Immediate Relief Techniques</h3>
+                    <div id="reliefTechniques" class="grid gap-4"></div>
+                </div>
+                
+                <button id="restartButton" class="glass-morphism text-white px-8 py-3 md:px-10 md:py-4 rounded-full text-lg md:text-xl font-semibold hover-lift mt-6">
+                    Start New Assessment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            class EmotionalCompass {
+                constructor() {
+                    console.log("Initializing Emotional Compass...");
+                    this.initializeElements();
+                    this.bindEvents();
+                    this.resetGame();
+                }
+
+                initializeElements() {
+                    console.log("Initializing DOM elements...");
+                    this.startButton = document.getElementById('startButton');
+                    if (!this.startButton) {
+                        console.error("Start button not found!");
+                    }
+                    // Screens
+                    this.startScreen = document.getElementById('startScreen');
+                    this.moodAssessmentScreen = document.getElementById('moodAssessmentScreen');
+                    this.overthinkingAssessmentScreen = document.getElementById('overthinkingAssessmentScreen');
+                    this.resultScreen = document.getElementById('resultScreen');
+                    
+                    // Mood Assessment Elements
+                    this.questionText = document.getElementById('questionText');
+                    this.optionsContainer = document.getElementById('optionsContainer');
+                    this.progressBar = document.getElementById('progressBar');
+                    
+                    // Overthinking Assessment Elements
+                    this.otQuestionText = document.getElementById('otQuestionText');
+                    this.otOptionsContainer = document.getElementById('otOptionsContainer');
+                    this.otProgressBar = document.getElementById('otProgressBar');
+                    
+                    // Result Elements
+                    this.moodTitle = document.getElementById('moodTitle');
+                    this.moodEmoji = document.getElementById('moodEmoji');
+                    this.moodDescription = document.getElementById('moodDescription');
+                    this.overthinkingPatterns = document.getElementById('overthinkingPatterns');
+                    this.recommendationContainer = document.getElementById('recommendationContainer');
+                    this.reliefTechniques = document.getElementById('reliefTechniques');
+                    
+                    // Buttons
+                    this.startButton = document.getElementById('startButton');
+                    this.restartButton = document.getElementById('restartButton');
+                }
+
+                bindEvents() {
+                    console.log("Binding event listeners...");
+                    if (this.startButton) {
+                        this.startButton.addEventListener('click', () => {
+                            console.log("Start button clicked.");
+                            this.startAssessment();
+                        });
+                    } else {
+                        console.error("Failed to bind event listener to start button.");
+                    }
+                    this.restartButton.addEventListener('click', () => this.resetGame());
+                }
+
+                resetGame() {
+                    console.log("Resetting game...");
+                    this.currentMoodQuestionIndex = 0;
+                    this.currentOTQuestionIndex = 0;
+                    this.moodScore = 0;
+                    this.overthinkingScore = 0;
+                    this.identifiedPatterns = [];
+                    
+                    this.startScreen.classList.remove('hidden');
+                    this.moodAssessmentScreen.classList.add('hidden');
+                    this.overthinkingAssessmentScreen.classList.add('hidden');
+                    this.resultScreen.classList.add('hidden');
+                    
+                    this.progressBar.style.width = '0%';
+                    this.otProgressBar.style.width = '0%';
+                    
+                    gsap.from(this.startScreen.children, { 
+                        opacity: 1, 
+                        y: 20, 
+                        stagger: 0.15,
+                        ease: "power2.out"
+                    });
+                }
+
+                startAssessment() {
+                    console.log("Starting mood assessment...");
+                    if (!this.startScreen || !this.moodAssessmentScreen) {
+                        console.error("Screens not properly initialized.");
+                        return;
+                    }
+                    this.startScreen.classList.add('hidden');
+                    this.moodAssessmentScreen.classList.remove('hidden');
+                    this.loadMoodQuestion();
+                }
+
+                loadMoodQuestion() {
+                    console.log(Loading mood question ${this.currentMoodQuestionIndex + 1}...);
+                    const question = this.moodQuestions[this.currentMoodQuestionIndex];
+                    
+                    this.questionText.textContent = question.text;
+                    this.optionsContainer.innerHTML = '';
+                    
+                    question.options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.textContent = option.text;
+                        button.className = 'glass-morphism text-white p-3 md:p-4 rounded-xl option-btn hover:bg-white/20';
+                        button.addEventListener('click', () => this.selectMoodOption(option.score, option.followUp));
+                        this.optionsContainer.appendChild(button);
+                    });
+
+                    const progress = ((this.currentMoodQuestionIndex + 1) / this.moodQuestions.length) * 100;
+                    this.progressBar.style.width = ${progress}%;
+
+                    gsap.from(this.questionText, { opacity: 0, y: -10, duration: 0.3 });
+                    gsap.from(this.optionsContainer.children, { 
+                        opacity: 1, 
+                        y: 10, 
+                        stagger: 0.1,
+                        duration: 0.3
+                    });
+                }
+
+                selectMoodOption(score, followUp) {
+                    console.log(Selected mood option with score: ${score});
+                    this.moodScore += score;
+                    
+                    if (followUp) {
+                        this.moodQuestions.splice(this.currentMoodQuestionIndex + 1, 0, followUp);
+                    }
+                    
+                    if (++this.currentMoodQuestionIndex < this.moodQuestions.length) {
+                        this.loadMoodQuestion();
+                    } else {
+                        this.startOverthinkingAssessment();
+                    }
+                }
+
+                startOverthinkingAssessment() {
+                    console.log("Starting overthinking assessment...");
+                    this.moodAssessmentScreen.classList.add('hidden');
+                    this.overthinkingAssessmentScreen.classList.remove('hidden');
+                    this.loadOTQuestion();
+                }
+
+                loadOTQuestion() {
+                    console.log(Loading overthinking question ${this.currentOTQuestionIndex + 1}...);
+                    const question = this.overthinkingQuestions[this.currentOTQuestionIndex];
+                    
+                    this.otQuestionText.textContent = question.text;
+                    this.otOptionsContainer.innerHTML = '';
+                    
+                    question.options.forEach(option => {
+                        const button = document.createElement('button');
+                        button.textContent = option.text;
+                        button.className = 'glass-morphism text-white p-3 md:p-4 rounded-xl option-btn hover:bg-white/20';
+                        button.addEventListener('click', () => this.selectOTOption(option.score, option.pattern));
+                        this.otOptionsContainer.appendChild(button);
+                    });
+
+                    const progress = ((this.currentOTQuestionIndex + 1) / this.overthinkingQuestions.length) * 100;
+                    this.otProgressBar.style.width = ${progress}%;
+
+                    gsap.from(this.otQuestionText, { opacity: 0, y: -10, duration: 0.3 });
+                    gsap.from(this.otOptionsContainer.children, { 
+                        opacity: 1, 
+                        y: 10, 
+                        stagger: 0.1,
+                        duration: 0.3
+                    });
+                }
+
+                selectOTOption(score, pattern) {
+                    console.log(Selected overthinking option with score: ${score});
+                    this.overthinkingScore += score;
+                    
+                    if (score >= 2 && pattern) {
+                        this.identifiedPatterns.push(pattern);
+                    }
+                    
+                    if (++this.currentOTQuestionIndex < this.overthinkingQuestions.length) {
+                        this.loadOTQuestion();
+                    } else {
+                        this.showResults();
+                    }
+                }
+
+                showResults() {
+                    console.log("Displaying results...");
+                    // Determine mood
+                    const moodResult = this.determineMood(this.moodScore);
+                    this.moodTitle.textContent = moodResult.title;
+                    this.moodEmoji.textContent = moodResult.emoji;
+                    this.moodDescription.textContent = moodResult.description;
+                    
+                    // Display overthinking patterns
+                    this.overthinkingPatterns.innerHTML = '';
+                    if (this.identifiedPatterns.length > 0) {
+                        this.identifiedPatterns.forEach(pattern => {
+                            const div = document.createElement('div');
+                            div.className = 'glass-morphism p-4 rounded-xl text-left';
+                            div.innerHTML = `
+                                <h4 class="font-bold text-lg mb-1">${pattern.title}</h4>
+                                <p class="text-white/80">${pattern.description}</p>
+                            `;
+                            this.overthinkingPatterns.appendChild(div);
+                        });
+                    } else {
+                        const div = document.createElement('div');
+                        div.className = 'glass-morphism p-4 rounded-xl';
+                        div.textContent = "You don't show strong signs of overthinking patterns. This is great!";
+                        this.overthinkingPatterns.appendChild(div);
+                    }
+                    
+                    // Display recommendations
+                    this.recommendationContainer.innerHTML = '';
+                    const recommendations = this.getRecommendations(moodResult, this.identifiedPatterns);
+                    recommendations.forEach(rec => {
+                        const div = document.createElement('div');
+                        div.className = 'glass-morphism p-4 rounded-xl text-left';
+                        div.innerHTML = `
+                            <h4 class="font-bold mb-2 flex items-center">
+                                <span class="mr-2">${rec.emoji}</span>
+                                ${rec.title}
+                            </h4>
+                            <p class="text-white/80">${rec.description}</p>
+                        `;
+                        this.recommendationContainer.appendChild(div);
+                    });
+                    
+                    // Display immediate relief techniques
+                    this.reliefTechniques.innerHTML = '';
+                    const techniques = this.getReliefTechniques(moodResult, this.identifiedPatterns);
+                    techniques.forEach(tech => {
+                        const div = document.createElement('div');
+                        div.className = 'glass-morphism p-4 rounded-xl text-left';
+                        div.innerHTML = `
+                            <h4 class="font-bold mb-2">${tech.title}</h4>
+                            <p class="text-white/80 mb-2">${tech.description}</p>
+                            ${tech.steps ? `<ol class="list-decimal list-inside text-white/80 pl-2">${tech.steps.map(step => <li class="mb-1">${step}</li>).join('')}</ol>` : ''}
+                        `;
+                        this.reliefTechniques.appendChild(div);
+                    });
+                    
+                    // Show result screen
+                    this.overthinkingAssessmentScreen.classList.add('hidden');
+                    this.resultScreen.classList.remove('hidden');
+                    
+                    // Animate results
+                    gsap.from("#resultScreen > div > *", {
+                        opacity: 0,
+                        y: 20,
+                        stagger: 0.1,
+                        duration: 0.5,
+                        ease: "back.out"
+                    });
+                }
+
+                determineMood(score) {
+                    console.log(Determining mood for score: ${score});
+                    if (score >= 15) return {
+                        title: "Euphoric & Energized",
+                        emoji: "😄",
+                        description: "You're experiencing high positive energy and excitement. While this is wonderful, be mindful of maintaining balance and not overextending yourself.",
+                        type: "positive-high"
+                    };
+                    if (score >= 8) return {
+                        title: "Content & Balanced",
+                        emoji: "😊",
+                        description: "You're in a good place emotionally, feeling generally satisfied with life. This is an excellent state for personal growth and meaningful connections.",
+                        type: "positive"
+                    };
+                    if (score >= 0) return {
+                        title: "Neutral & Reflective",
+                        emoji: "😐",
+                        description: "You're in a contemplative state, neither particularly happy nor sad. This can be a good time for self-reflection and evaluation.",
+                        type: "neutral"
+                    };
+                    if (score >= -7) return {
+                        title: "Mildly Stressed",
+                        emoji: "😕",
+                        description: "You're experiencing some stress or unease, but it's manageable. Small adjustments to your routine could help improve your mood.",
+                        type: "mild-stress"
+                    };
+                    if (score >= -14) return {
+                        title: "Anxious or Down",
+                        emoji: "😟",
+                        description: "You're going through a challenging emotional period. Remember that this is temporary, and there are concrete steps you can take to feel better.",
+                        type: "moderate-stress"
+                    };
+                    return {
+                        title: "Highly Distressed",
+                        emoji: "😢",
+                        description: "You're experiencing significant emotional distress. Please know that help is available, and you don't have to go through this alone.",
+                        type: "high-stress"
+                    };
+                }
+
+                getRecommendations(moodResult, patterns) {
+                    console.log("Generating recommendations...");
+                    const recommendations = [];
+                    
+                    // Mood-specific recommendations
+                    if (moodResult.type === "positive-high") {
+                        recommendations.push({
+                            emoji: "⚖",
+                            title: "Energy Management",
+                            description: "Channel your energy into creative projects or physical activity to maintain balance and prevent burnout."
+                        });
+                        recommendations.push({
+                            emoji: "🤝",
+                            title: "Share Your Energy",
+                            description: "Connect with others who might benefit from your positive outlook, but be mindful not to overwhelm them."
+                        });
+                    } else if (moodResult.type === "positive") {
+                        recommendations.push({
+                            emoji: "📝",
+                            title: "Gratitude Practice",
+                            description: "Start a gratitude journal to reinforce your positive mindset and build resilience for tougher times."
+                        });
+                        recommendations.push({
+                            emoji: "🌱",
+                            title: "Personal Growth",
+                            description: "Use this stable period to develop new skills or habits that will support you during more challenging times."
+                        });
+                    } else if (moodResult.type === "neutral") {
+                        recommendations.push({
+                            emoji: "🧘",
+                            title: "Mindfulness Practice",
+                            description: "Try a daily 10-minute mindfulness meditation to become more aware of subtle emotional shifts."
+                        });
+                        recommendations.push({
+                            emoji: "🔍",
+                            title: "Self-Reflection",
+                            description: "Use this calm period to reflect on your values, goals, and life direction without pressure."
+                        });
+                    } else if (moodResult.type === "mild-stress") {
+                        recommendations.push({
+                            emoji: "🏃",
+                            title: "Physical Movement",
+                            description: "Regular moderate exercise can help regulate your mood and reduce stress hormones."
+                        });
+                        recommendations.push({
+                            emoji: "⏰",
+                            title: "Routine Adjustment",
+                            description: "Small changes to your daily routine can create positive ripple effects in your emotional state."
+                        });
+                    } else if (moodResult.type === "moderate-stress") {
+                        recommendations.push({
+                            emoji: "📞",
+                            title: "Social Connection",
+                            description: "Reach out to trusted friends or family members for support—you don't have to go through this alone."
+                        });
+                        recommendations.push({
+                            emoji: "💤",
+                            title: "Sleep Hygiene",
+                            description: "Prioritize good sleep habits, as emotional regulation is closely tied to sleep quality."
+                        });
+                    } else {
+                        recommendations.push({
+                            emoji: "🆘",
+                            title: "Professional Support",
+                            description: "Consider reaching out to a mental health professional who can provide personalized support."
+                        });
+                        recommendations.push({
+                            emoji: "🛡",
+                            title: "Safety Plan",
+                            description: "Create a list of emergency contacts and coping strategies for when you feel overwhelmed."
+                        });
+                    }
+                    
+                    // Pattern-specific recommendations
+                    patterns.forEach(pattern => {
+                        if (pattern.type === "catastrophizing") {
+                            recommendations.push({
+                                emoji: "🔮",
+                                title: "Reality Check",
+                                description: "When imagining worst-case scenarios, ask yourself: 'What evidence do I have that this will actually happen?'"
+                            });
+                        }
+                        if (pattern.type === "rumination") {
+                            recommendations.push({
+                                emoji: "🔄",
+                                title: "Thought Stopping",
+                                description: "When you notice repetitive thoughts, physically change your environment (stand up, splash water on your face) to interrupt the cycle."
+                            });
+                        }
+                        if (pattern.type === "mind-reading") {
+                            recommendations.push({
+                                emoji: "🧠",
+                                title: "Fact vs. Assumption",
+                                description: "Challenge assumptions about others' thoughts by looking for concrete evidence or simply asking them directly."
+                            });
+                        }
+                        if (pattern.type === "perfectionism") {
+                            recommendations.push({
+                                emoji: "🎯",
+                                title: "Good Enough",
+                                description: "Practice completing tasks to 80% perfection and observe that the world doesn't end—this builds tolerance for imperfection."
+                            });
+                        }
+                    });
+                    
+                    return recommendations.slice(0, 6); // Limit to 6 recommendations
+                }
+
+                getReliefTechniques(moodResult, patterns) {
+                    console.log("Generating relief techniques...");
+                    const techniques = [];
+                    
+                    // Immediate relief for all states
+                    techniques.push({
+                        title: "Box Breathing",
+                        description: "A simple technique to quickly calm your nervous system:",
+                        steps: [
+                            "Inhale deeply through your nose for 4 seconds",
+                            "Hold your breath for 4 seconds",
+                            "Exhale slowly through your mouth for 6 seconds",
+                            "Hold for 2 seconds before next inhale",
+                            "Repeat for 1-2 minutes"
+                        ]
+                    });
+                    
+                    // Mood-specific techniques
+                    if (moodResult.type.includes("stress")) {
+                        techniques.push({
+                            title: "5-4-3-2-1 Grounding",
+                            description: "Use your senses to bring yourself back to the present moment:",
+                            steps: [
+                                "Name 5 things you can see",
+                                "4 things you can touch",
+                                "3 things you can hear",
+                                "2 things you can smell",
+                                "1 thing you can taste"
+                            ]
+                        });
+                        
+                        techniques.push({
+                            title: "Progressive Muscle Relaxation",
+                            description: "Systematically tense and relax muscle groups to release physical tension:",
+                            steps: [
+                                "Start with your feet, tense muscles for 5 seconds",
+                                "Release and notice the difference",
+                                "Work upward through legs, abdomen, arms, shoulders, face"
+                            ]
+                        });
+                    }
+                    
+                    if (patterns.some(p => p.type === "rumination")) {
+                        techniques.push({
+                            title: "Thought Defusion",
+                            description: "Detach from repetitive thoughts by:",
+                            steps: [
+                                "Imagine your thoughts as leaves floating down a stream",
+                                "Or as clouds passing in the sky",
+                                "Observe them without judgment, letting them come and go"
+                            ]
+                        });
+                    }
+                    
+                    if (patterns.some(p => p.type === "catastrophizing")) {
+                        techniques.push({
+                            title: "Probability Estimation",
+                            description: "Challenge catastrophic thinking by:",
+                            steps: [
+                                "Write down your feared outcome",
+                                "Estimate its actual probability (0-100%)",
+                                "List more likely outcomes",
+                                "Consider how you'd cope if it did happen"
+                            ]
+                        });
+                    }
+                    
+                    return techniques.slice(0, 3); // Limit to 3 techniques
+                }
+
+                moodQuestions = [
+                    {
+                        text: "How would you describe your overall mood right now?",
+                        options: [
+                            { text: "Exceptionally good - on top of the world", score: 5 },
+                            { text: "Pretty good - generally positive", score: 3 },
+                            { text: "Neutral - neither good nor bad", score: 1 },
+                            { text: "Somewhat low - mildly negative", score: -2 },
+                            { text: "Very low - quite negative", score: -4 },
+                            { text: "Extremely low - deeply distressed", score: -6 }
+                        ]
+                    },
+                    {
+                        text: "How energized do you feel?",
+                        options: [
+                            { text: "Extremely energetic and motivated", score: 4 },
+                            { text: "More energy than usual", score: 2 },
+                            { text: "Normal, average energy", score: 0 },
+                            { text: "Somewhat tired or sluggish", score: -2 },
+                            { text: "Very low energy", score: -4 }
+                        ]
+                    },
+                    {
+                        text: "How would you describe your thought patterns recently?",
+                        options: [
+                            { text: "Clear, focused, and positive", score: 3 },
+                            { text: "Mostly clear with occasional distractions", score: 1 },
+                            { text: "Somewhat scattered or distracted", score: -1 },
+                            { text: "Frequently racing or hard to control", score: -3 },
+                            { text: "Overwhelming and intrusive", score: -5 }
+                        ],
+                        followUp: {
+                            text: "When you have racing thoughts, what are they typically about?",
+                            options: [
+                                { text: "Future worries or 'what if' scenarios", score: -2 },
+                                { text: "Past mistakes or regrets", score: -2 },
+                                { text: "Current problems I can't solve", score: -2 },
+                                { text: "A mix of all these", score: -3 }
+                            ]
+                        }
+                    },
+                    {
+                        text: "How satisfied do you feel with your current life circumstances?",
+                        options: [
+                            { text: "Extremely satisfied", score: 4 },
+                            { text: "Mostly satisfied", score: 2 },
+                            { text: "Neutral - some good, some bad", score: 0 },
+                            { text: "Somewhat dissatisfied", score: -2 },
+                            { text: "Very dissatisfied", score: -4 }
+                        ]
+                    },
+                    {
+                        text: "How has your sleep been recently?",
+                        options: [
+                            { text: "Excellent - restful and sufficient", score: 3 },
+                            { text: "Good - mostly restful", score: 1 },
+                            { text: "Okay - some disturbances", score: -1 },
+                            { text: "Poor - frequent disturbances", score: -3 },
+                            { text: "Very poor - hardly sleeping", score: -5 }
+                        ]
+                    },
+                    {
+                        text: "How connected do you feel to others?",
+                        options: [
+                            { text: "Very connected - strong relationships", score: 3 },
+                            { text: "Somewhat connected - a few close people", score: 1 },
+                            { text: "Neutral - average social interaction", score: 0 },
+                            { text: "Somewhat isolated", score: -2 },
+                            { text: "Very isolated", score: -4 }
+                        ]
+                    },
+                    {
+                        text: "How would you describe your appetite recently?",
+                        options: [
+                            { text: "Normal - no changes", score: 0 },
+                            { text: "Increased appetite", score: -1 },
+                            { text: "Decreased appetite", score: -2 },
+                            { text: "Significantly increased", score: -3 },
+                            { text: "Significantly decreased", score: -4 }
+                        ]
+                    }
+                ];
+
+                overthinkingQuestions = [
+                    {
+                        text: "How often do you find yourself replaying past conversations or events in your mind?",
+                        options: [
+                            { text: "Almost constantly", score: 4, pattern: {
+                                type: "rumination",
+                                title: "Rumination",
+                                description: "You tend to repeatedly analyze past events, often focusing on negative aspects. This can maintain or intensify negative moods."
+                            }},
+                            { text: "Several times a day", score: 3 },
+                            { text: "A few times a week", score: 2 },
+                            { text: "Rarely", score: 1 },
+                            { text: "Almost never", score: 0 }
+                        ]
+                    },
+                    {
+                        text: "When facing a problem, how often do you imagine worst-case scenarios?",
+                        options: [
+                            { text: "Almost always - I expect the worst", score: 4, pattern: {
+                                type: "catastrophizing",
+                                title: "Catastrophizing",
+                                description: "You tend to imagine and dwell on the worst possible outcomes, which can create unnecessary anxiety."
+                            }},
+                            { text: "Frequently - it's hard to stay positive", score: 3 },
+                            { text: "Sometimes - depends on the situation", score: 2 },
+                            { text: "Rarely - I try to stay realistic", score: 1 },
+                            { text: "Almost never - I'm naturally optimistic", score: 0 }
+                        ]
+                    },
+                    {
+                        text: "How often do you worry about what others think of you?",
+                        options: [
+                            { text: "Constantly - it's always on my mind", score: 4, pattern: {
+                                type: "mind-reading",
+                                title: "Mind Reading",
+                                description: "You frequently assume you know what others are thinking, usually expecting negative judgments."
+                            }},
+                            { text: "Often - it affects my behavior", score: 3 },
+                            { text: "Sometimes - in certain situations", score: 2 },
+                            { text: "Rarely - I don't focus on it", score: 1 },
+                            { text: "Almost never", score: 0 }
+                        ]
+                    },
+                    {
+                        text: "How often do you delay starting tasks because you want them to be perfect?",
+                        options: [
+                            { text: "Almost always - perfection is essential", score: 4, pattern: {
+                                type: "perfectionism",
+                                title: "Perfectionism",
+                                description: "You set unrealistically high standards that can lead to procrastination or dissatisfaction with your work."
+                            }},
+                            { text: "Often - I have high standards", score: 3 },
+                            { text: "Sometimes - depends on the task", score: 2 },
+                            { text: "Rarely - done is better than perfect", score: 1 },
+                            { text: "Almost never", score: 0 }
+                        ]
+                    },
+                    {
+                        text: "When making decisions, how often do you get stuck analyzing every possible option?",
+                        options: [
+                            { text: "Always - I overanalyze everything", score: 4 },
+                            { text: "Often - I want to make the perfect choice", score: 3 },
+                            { text: "Sometimes - with important decisions", score: 2 },
+                            { text: "Rarely - I trust my instincts", score: 1 },
+                            { text: "Almost never - I decide quickly", score: 0 }
+                        ]
+                    },
+                    {
+                        text: "How often do you lose sleep because you can't stop thinking about things?",
+                        options: [
+                            { text: "Almost every night", score: 4 },
+                            { text: "Several nights a week", score: 3 },
+                            { text: "Occasionally", score: 2 },
+                            { text: "Rarely", score: 1 },
+                            { text: "Almost never", score: 0 }
+                        ]
+                    },
+                    {
+                        text: "When something minor goes wrong, how often does it dominate your thoughts?",
+                        options: [
+                            { text: "Always - I can't let it go", score: 4 },
+                            { text: "Often - it ruins my mood", score: 3 },
+                            { text: "Sometimes - depends on my stress level", score: 2 },
+                            { text: "Rarely - I move on quickly", score: 1 },
+                            { text: "Almost never - I don't dwell", score: 0 }
+                        ]
+                    }
+                ];
+            }
+
+            // Initialize the app
+            console.log("Document loaded. Initializing app...");
+            new EmotionalCompass();
+        });
+    </script>
+</body>
+</html>
